@@ -1,15 +1,23 @@
 import { Link } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from 'react-dom/client';
+import Clock from "./Clock";
 
 function Home() {
 
-    const [counter, setCounter] = useState(0);
+    const [time, setTime] = useState(()=> new Date());
+    const [color, setColor] = useState("black");
+
+    useEffect(()=> {
+        const id = setInterval(()=>setTime(new Date()), 1000);
+
+        return () => clearInterval(id); 
+    }, [])
+
 
     return(
         <div>
-            <button onClick={() => setCounter(counter+1)}>Increase value</button>
-            <div>Counter value is {counter}</div>
+            <Clock color={color} time={time.toLocaleTimeString()}/>
         </div>
     )
 }
