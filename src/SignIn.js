@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Controller, useForm } from 'react-hook-form';
 
 function Copyright(props) {
   return (
@@ -35,14 +36,32 @@ const darkTheme = createTheme({
   });
 
 export default function SignIn() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+
+  const {control, handleSubmit} = useForm({
+    defaultValues: {
+      email: ""
+    }
+  })
+
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const [isPasswordError, setIsPasswordError] = React.useState(false);
+
+  const onPasswordChange = (e) => {
+    const passwordValue = e.target.value;
+    setPassword(passwordValue);
+    if(passwordValue.length < 6) {
+      setIsPasswordError(true);
+    }
+    else {
+      setIsPasswordError(false);
+    }
+  }
+
+  const handleChange = (e) => {
+    setEmail(e.target.value);
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -62,26 +81,47 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
+          <Box component="form" noValidate sx={{ mt: 1 }}>
+
+            <Controller
               name="email"
-              autoComplete="email"
-              autoFocus
+              control={control}
+              render={({
+                field: {value, onChange, onBlur, ref},
+                fieldState: {error},
+              }) => (
+                <TextField
+                margin="normal"
+                inputRef={ref}
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                value={value}
+                onBlur={onBlur}
+                onChange={onChange}
+                error={Boolean(error)}
+                autoComplete="email"
+                autoFocus
+              />
+             )}
             />
+           
+           
             <TextField
               margin="normal"
               required
+              error = {isPasswordError}
               fullWidth
               name="password"
               label="Password"
               type="password"
               id="password"
+              value={password}
+              onChange = {onPasswordChange}
               autoComplete="current-password"
+              helperText={"Invalid password"}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -110,6 +150,7 @@ export default function SignIn() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
+        <Typography variant='h1'>{email}</Typography>
       </Container>
     </ThemeProvider>
   );
