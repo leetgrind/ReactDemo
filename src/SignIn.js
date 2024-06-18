@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { z } from "zod";
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
+import { zodResolver } from "@hookform/resolvers/zod";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
@@ -37,30 +39,23 @@ const darkTheme = createTheme({
 
 export default function SignIn() {
 
+  const formSchema = z.object({
+    email: z.string().min(1).email("Email is invalid")
+  })
+
   const {control, handleSubmit} = useForm({
+    mode: "onBlur",
+    reValidateMode: "onBlur",
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: ""
     }
   })
 
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  
 
-  const [isPasswordError, setIsPasswordError] = React.useState(false);
-
-  const onPasswordChange = (e) => {
-    const passwordValue = e.target.value;
-    setPassword(passwordValue);
-    if(passwordValue.length < 6) {
-      setIsPasswordError(true);
-    }
-    else {
-      setIsPasswordError(false);
-    }
-  }
-
-  const handleChange = (e) => {
-    setEmail(e.target.value);
+  const onSubmit = (data) => {
+    console.log(data);
   }
 
   return (
@@ -81,7 +76,7 @@ export default function SignIn() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
 
             <Controller
               name="email"
@@ -104,6 +99,7 @@ export default function SignIn() {
                 error={Boolean(error)}
                 autoComplete="email"
                 autoFocus
+                helperText={error?.message ?? ''}
               />
              )}
             />
@@ -112,14 +108,11 @@ export default function SignIn() {
             <TextField
               margin="normal"
               required
-              error = {isPasswordError}
               fullWidth
               name="password"
               label="Password"
               type="password"
               id="password"
-              value={password}
-              onChange = {onPasswordChange}
               autoComplete="current-password"
               helperText={"Invalid password"}
             />
@@ -150,7 +143,6 @@ export default function SignIn() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
-        <Typography variant='h1'>{email}</Typography>
       </Container>
     </ThemeProvider>
   );
